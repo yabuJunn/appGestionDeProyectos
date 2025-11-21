@@ -1,18 +1,16 @@
 import { Link } from 'react-router-dom'
+import logo from '../../assests/png/LogoFlowAI.png'
 
 export default function Footer() {
   return (
     <footer className="bg-dark-950 border-t border-dark-800">
       <div className="container mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">F</span>
-              </div>
-              <span className="text-white font-bold text-xl">FlowAI</span>
+          <div className="flex items-center space-x-4">
+            <div className="w-18 h-18 rounded-lg flex items-center justify-center overflow-hidden">
+              <img src={logo} alt="logo flowAI" className="w-full h-full object-cover" />
             </div>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-400 text-sm max-w-xs">
               Gestión inteligente para pymes con IA y análisis avanzado.
             </p>
           </div>
@@ -27,7 +25,7 @@ export default function Footer() {
               </li>
               <li>
                 <a href="#pricing" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  Precios
+                  Como funciona
                 </a>
               </li>
               <li>

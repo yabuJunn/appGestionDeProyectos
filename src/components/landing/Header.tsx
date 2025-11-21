@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import logo from '../../assests/png/LogoFlowAI.png'
 
 export default function Header() {
   const { isAuthenticated, logout, login } = useAuth()
@@ -17,22 +18,21 @@ export default function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-dark-950/80 backdrop-blur-md border-b border-dark-800">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">F</span>
+          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <div className="w-18 h-18 rounded-lg flex items-center justify-center overflow-hidden">
+              <img src={logo} alt="logo flowAI" className="w-full h-full object-cover" />
             </div>
-            <span className="text-white font-bold text-xl">FlowAI</span>
           </div>
-          
+
           <nav className="hidden md:flex items-center space-x-8">
             <a href="#features" className="text-gray-300 hover:text-white transition-colors">
               Características
             </a>
+            <a href="#pricing" className="text-gray-300 hover:text-white transition-colors">
+              Como funciona
+            </a>
             <a href="#testimonials" className="text-gray-300 hover:text-white transition-colors">
               Testimonios
-            </a>
-            <a href="#pricing" className="text-gray-300 hover:text-white transition-colors">
-              Precios
             </a>
           </nav>
 

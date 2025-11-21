@@ -3,6 +3,7 @@ import Hero from '../components/landing/Hero'
 import FeatureCards from '../components/landing/FeatureCards'
 import Testimonials from '../components/landing/Testimonials'
 import Footer from '../components/landing/Footer'
+import HowItWorks from '@/components/landing/HowItWorks'
 
 export default function LandingPage() {
   return (
@@ -10,6 +11,7 @@ export default function LandingPage() {
       <Header />
       <Hero />
       <FeatureCards />
+      <HowItWorks />
       <Testimonials />
       <Footer />
     </div>

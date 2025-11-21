@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
+import logo from '../../assests/png/LogoFlowAI.png'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   LayoutDashboard,
@@ -27,12 +28,11 @@ export default function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-dark-900 border-r border-dark-800 flex flex-col">
-      <div className="p-6 border-b border-dark-800">
+      <div className="p-6 border-b border-dark-800 flex justify-center items-center">
         <div className="flex items-center space-x-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-xl">F</span>
+          <div className="w-18 h-18 rounded-lg flex items-center justify-center overflow-hidden">
+            <img src={logo} alt="logo flowAI" className="w-full h-full object-cover" />
           </div>
-          <span className="text-white font-bold text-xl">FlowAI</span>
         </div>
       </div>
 
@@ -44,11 +44,10 @@ export default function Sidebar() {
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
-                    isActive
-                      ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-                      : 'text-gray-300 hover:bg-dark-800 hover:text-white'
-                  }`}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${isActive
+                    ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
+                    : 'text-gray-300 hover:bg-dark-800 hover:text-white'
+                    }`}
                 >
                   {item.icon}
                   <span className="font-medium">{item.label}</span>
@@ -68,7 +67,7 @@ export default function Sidebar() {
           <span className="font-medium">Cerrar Sesión</span>
         </button>
       </div>
-    </aside>
+    </aside >
   )
 }
 
