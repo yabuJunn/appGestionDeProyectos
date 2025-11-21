@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
 interface User {
   id: string
@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // STUB: Simulación de login
     // En producción, reemplazar con Supabase Auth:
     // const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    
+
     if (email && password) {
       const mockUser: User = {
         id: '1',
