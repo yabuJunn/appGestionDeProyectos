@@ -2,61 +2,78 @@ import { useState, useEffect } from 'react'
 import Sidebar from '../components/dashboard/Sidebar'
 import KpiCard from '../components/dashboard/KpiCard'
 import InventoryTable from '../components/dashboard/InventoryTable'
-import OrdersList from '../components/dashboard/OrdersList'
+import MenuTable from '../components/dashboard/MenuTable'
+import IngredientsTable from '../components/dashboard/IngredientsTable'
 import { useAuth } from '../contexts/AuthContext'
-import { DollarSign, Package, ShoppingCart, TrendingUp } from 'lucide-react'
-import { getProducts } from '../api/products'
-import { getOrders } from '../api/orders'
-import { getInventory } from '../api/inventory'
+import { DollarSign, Package, UtensilsCrossed, TrendingUp } from 'lucide-react'
+import { getMenu } from '../services/menu'
+import { getInventory } from '../services/inventory'
+import { getIngredients } from '../services/ingredients'
 
 export default function Dashboard() {
   const { user } = useAuth()
   const [stats, setStats] = useState({
     totalRevenue: 0,
     totalProducts: 0,
-    totalOrders: 0,
+    totalMenuItems: 0,
     inventoryValue: 0,
   })
 
   useEffect(() => {
     async function loadStats() {
-      if (!user?.company_id) return
-
       try {
-        const [products, orders, inventory] = await Promise.all([
-          getProducts(user.company_id),
-          getOrders(user.company_id),
-          getInventory(user.company_id),
+        console.log('🔄 Cargando estadísticas del dashboard...')
+        const [menu, inventory, ingredients] = await Promise.all([
+          getMenu(),
+          getInventory(),
+          getIngredients(),
         ])
 
+        console.log('📊 Datos cargados:', {
+          menu: menu.length,
+          inventory: inventory.length,
+          ingredients: ingredients.length,
+        })
+
         // Calcular estadísticas
-        const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0)
-        const totalProducts = products.length
-        const totalOrders = orders.length
+        const totalRevenue = menu
+          .filter(item => item.availability)
+          .reduce((sum, item) => sum + item.price, 0)
+
+        const totalProducts = ingredients.length
+        const totalMenuItems = menu.length
+
         const inventoryValue = inventory.reduce((sum, item) => {
-          return sum + (item.quantity * (item.product?.unit_price || 0))
+          return sum + (item.amount * item.price)
         }, 0)
+
+        console.log('✅ Estadísticas calculadas:', {
+          totalRevenue,
+          totalProducts,
+          totalMenuItems,
+          inventoryValue,
+        })
 
         setStats({
           totalRevenue,
           totalProducts,
-          totalOrders,
+          totalMenuItems,
           inventoryValue,
         })
       } catch (error) {
-        console.error('Error loading stats:', error)
-        // Usar valores mock si hay error
+        console.error('❌ Error loading stats:', error)
+        // Usar valores por defecto si hay error
         setStats({
-          totalRevenue: 125000,
-          totalProducts: 45,
-          totalOrders: 128,
-          inventoryValue: 45000,
+          totalRevenue: 0,
+          totalProducts: 0,
+          totalMenuItems: 0,
+          inventoryValue: 0,
         })
       }
     }
 
     loadStats()
-  }, [user])
+  }, [])
 
   return (
     <div className="min-h-screen bg-dark-950">
@@ -73,43 +90,48 @@ export default function Dashboard() {
           {/* KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <KpiCard
-              title="Ingresos Totales"
+              title="Valor Total Menú"
               value={`$${stats.totalRevenue.toLocaleString()}`}
               delta={12.5}
-              deltaLabel="vs mes anterior"
+              deltaLabel="productos disponibles"
               icon={<DollarSign className="w-6 h-6" />}
               trend="up"
             />
             <KpiCard
-              title="Productos"
+              title="Productos con Receta"
               value={stats.totalProducts}
-              delta={8.2}
-              deltaLabel="nuevos este mes"
+              delta={0}
+              deltaLabel="total de productos"
               icon={<Package className="w-6 h-6" />}
               trend="up"
             />
             <KpiCard
-              title="Pedidos"
-              value={stats.totalOrders}
-              delta={-3.1}
-              deltaLabel="vs mes anterior"
-              icon={<ShoppingCart className="w-6 h-6" />}
-              trend="down"
+              title="Items en Menú"
+              value={stats.totalMenuItems}
+              delta={0}
+              deltaLabel="total de items"
+              icon={<UtensilsCrossed className="w-6 h-6" />}
+              trend="up"
             />
             <KpiCard
               title="Valor Inventario"
               value={`$${stats.inventoryValue.toLocaleString()}`}
               delta={5.7}
-              deltaLabel="vs mes anterior"
+              deltaLabel="valor total"
               icon={<TrendingUp className="w-6 h-6" />}
               trend="up"
             />
           </div>
 
           {/* Tables Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <InventoryTable />
-            <OrdersList />
+            <MenuTable />
+          </div>
+
+          {/* Ingredients Table - Full Width */}
+          <div className="mt-6">
+            <IngredientsTable />
           </div>
         </div>
       </main>

@@ -1,96 +1,34 @@
 import { useState, useEffect } from 'react'
-import { getInventory, InventoryItem } from '../../api/inventory'
-import { useAuth } from '../../contexts/AuthContext'
+import { getInventory, InventoryItem } from '../../services/inventory'
 import { Package, AlertCircle } from 'lucide-react'
 
-// Mock data para desarrollo
-const mockInventory: InventoryItem[] = [
-  {
-    id: '1',
-    product_id: '1',
-    quantity: 150,
-    expiry_date: '2024-12-31',
-    updated_at: new Date().toISOString(),
-    product: {
-      name: 'Producto A',
-      unit_price: 29.99,
-    },
-  },
-  {
-    id: '2',
-    product_id: '2',
-    quantity: 45,
-    expiry_date: '2024-11-15',
-    updated_at: new Date().toISOString(),
-    product: {
-      name: 'Producto B',
-      unit_price: 49.99,
-    },
-  },
-  {
-    id: '3',
-    product_id: '3',
-    quantity: 200,
-    expiry_date: null,
-    updated_at: new Date().toISOString(),
-    product: {
-      name: 'Producto C',
-      unit_price: 19.99,
-    },
-  },
-  {
-    id: '4',
-    product_id: '4',
-    quantity: 12,
-    expiry_date: '2024-10-20',
-    updated_at: new Date().toISOString(),
-    product: {
-      name: 'Producto D',
-      unit_price: 79.99,
-    },
-  },
-]
-
-function getStatus(quantity: number, expiryDate: string | null): {
+function getStatus(amount: number, amountAlert: number): {
   label: string
   color: string
   bgColor: string
 } {
-  if (quantity === 0) {
+  if (amount === 0) {
     return { label: 'Agotado', color: 'text-red-400', bgColor: 'bg-red-500/10' }
   }
-  if (quantity < 20) {
-    return { label: 'Bajo Stock', color: 'text-yellow-400', bgColor: 'bg-yellow-500/10' }
-  }
-  if (expiryDate) {
-    const expiry = new Date(expiryDate)
-    const daysUntilExpiry = Math.ceil((expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    if (daysUntilExpiry < 30) {
-      return { label: 'Por Vencer', color: 'text-orange-400', bgColor: 'bg-orange-500/10' }
-    }
+  if (amount <= amountAlert) {
+    return { label: 'Alerta de Stock', color: 'text-yellow-400', bgColor: 'bg-yellow-500/10' }
   }
   return { label: 'Disponible', color: 'text-green-400', bgColor: 'bg-green-500/10' }
 }
 
 export default function InventoryTable() {
-  const { user } = useAuth()
   const [inventory, setInventory] = useState<InventoryItem[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function loadInventory() {
       setLoading(true)
-      if (user?.company_id) {
-        const data = await getInventory(user.company_id)
-        // Si no hay datos de Supabase, usar mock data
-        setInventory(data.length > 0 ? data : mockInventory)
-      } else {
-        setInventory(mockInventory)
-      }
+      const data = await getInventory()
+      setInventory(data)
       setLoading(false)
     }
     loadInventory()
-  }, [user])
+  }, [])
 
   if (loading) {
     return (
@@ -122,6 +60,9 @@ export default function InventoryTable() {
                 Cantidad
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Alerta
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                 Estado
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -130,34 +71,41 @@ export default function InventoryTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-dark-700">
-            {inventory.map((item) => {
-              const status = getStatus(item.quantity, item.expiry_date)
-              return (
-                <tr key={item.id} className="hover:bg-dark-900/30 transition-colors">
+            {inventory.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-8 text-center text-gray-400">
+                  No hay datos de inventario disponibles
+                </td>
+              </tr>
+            ) : (
+              inventory.map((item) => {
+                const status = getStatus(item.amount, item.amount_alert)
+                return (
+                  <tr key={`inventory-${item.product}`} className="hover:bg-dark-900/30 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-white font-medium">
-                      {item.product?.name || 'Producto sin nombre'}
-                    </div>
+                    <div className="text-white font-medium">{item.product}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-gray-300">{item.quantity}</div>
+                    <div className="text-gray-300">{item.amount.toFixed(2)}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-gray-400 text-sm">{item.amount_alert.toFixed(2)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${status.color} ${status.bgColor}`}
                     >
-                      {item.quantity < 20 && <AlertCircle className="w-3 h-3 mr-1" />}
+                      {item.amount <= item.amount_alert && <AlertCircle className="w-3 h-3 mr-1" />}
                       {status.label}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-gray-300">
-                      ${item.product?.unit_price?.toFixed(2) || '0.00'}
-                    </div>
+                    <div className="text-gray-300">${item.price.toFixed(2)}</div>
                   </td>
                 </tr>
-              )
-            })}
+                )
+              })
+            )}
           </tbody>
         </table>
       </div>

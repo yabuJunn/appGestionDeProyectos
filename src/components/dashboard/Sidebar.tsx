@@ -38,10 +38,10 @@ export default function Sidebar() {
 
       <nav className="flex-1 p-4">
         <ul className="space-y-2">
-          {navItems.map((item) => {
+          {navItems.map((item, index) => {
             const isActive = location.pathname === item.path
             return (
-              <li key={item.path}>
+              <li key={`nav-${item.label}-${index}`}>
                 <Link
                   to={item.path}
                   className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${isActive
